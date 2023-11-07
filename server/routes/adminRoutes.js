@@ -29,7 +29,7 @@ import {
   // allCommitee,
   // addCommitteeMember,
   addCommitteeMembers,
-  // getCommittee,
+  getAllCommittee,
   // getCommitteeMember
 } from "../controller/adminController.js";
 const router = express.Router();
@@ -42,6 +42,8 @@ router.get("/getallfaculty", auth, getAllFaculty);
 router.get("/getalldepartment", auth, getAllDepartment);
 router.get("/getallsubject", auth, getAllSubject);
 router.get("/getalladmin", auth, getAllAdmin);
+router.get("/getAllcommittee", auth, getAllCommittee);
+
 router.post("/updateprofile", auth, updateAdmin);
 router.post("/addadmin", auth, addAdmin);
 router.post("/adddepartment", auth, addDepartment);

@@ -774,6 +774,14 @@ export const getAllDepartment = async (req, res) => {
     console.log("Backend Error", error);
   }
 };
+export const getAllCommittee = async (req, res) => {
+  try {
+    const committees = await Committee.find();
+    res.status(200).json(committees);
+  } catch (error) {
+    console.log("Backend Error", error);
+  }
+};
 export const getAllSubject = async (req, res) => {
   try {
     const subjects = await Subject.find();
