@@ -30,6 +30,8 @@ import {
   // addCommitteeMember,
   addCommitteeMembers,
   getAllCommittee,
+  getAllCommitteeMember ,
+  getMember,
   // getCommitteeMember
 } from "../controller/adminController.js";
 const router = express.Router();
@@ -43,6 +45,7 @@ router.get("/getalldepartment", auth, getAllDepartment);
 router.get("/getallsubject", auth, getAllSubject);
 router.get("/getalladmin", auth, getAllAdmin);
 router.get("/getAllcommittee", auth, getAllCommittee);
+router.get("/getAllcommitteeMember", auth, getAllCommitteeMember);
 
 router.post("/updateprofile", auth, updateAdmin);
 router.post("/addadmin", auth, addAdmin);
@@ -57,6 +60,8 @@ router.post("/addsubject", auth, addSubject);
 router.post("/getsubject", auth, getSubject);
 router.post("/addstudent", auth, addStudent);
 router.post("/getstudent", auth, getStudent);
+router.post("/getmember", auth, getMember);
+
 router.post("/getnotice", auth, getNotice);
 router.post("/getadmin", auth, getAdmin);
 router.post("/deleteadmin", auth, deleteAdmin);

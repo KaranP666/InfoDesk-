@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import multer from 'multer';
 import express from 'express';
+
 import Achievement from '../models/student.js'; // Import the achievement model
 
 const router = express.Router();
@@ -121,6 +122,7 @@ export const updateStudent = async (req, res) => {
       fatherName,
       motherName,
       fatherContactNumber,
+      skillSets // Add skillSets to the destructuring assignment
     } = req.body;
     const updatedStudent = await Student.findOne({ email });
     if (name) {
@@ -166,6 +168,10 @@ export const updateStudent = async (req, res) => {
     if (avatar) {
       updatedStudent.avatar = avatar;
       await updatedStudent.save();
+    }
+
+    if (skillSets) {
+      updatedStudent.skillSets = skillSets;
     }
     res.status(200).json(updatedStudent);
   } catch (error) {

@@ -7,7 +7,7 @@ import Subject from "../models/subject.js";
 import Notice from "../models/notice.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import committeeMembers from "../models/committeeMembers.js";
+import committeemembers from "../models/committeeMembers.js";
 
 export const adminLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -279,13 +279,13 @@ export const addCommitteeMembers = async (req, res) => {
     } = req.body;
 
     // Check if the member with the given email already exists
-    const existingMember = await committeeMembers.findOne({ email });
+    const existingMember = await committeemembers.findOne({ email });
     if (existingMember) {
       return res.status(400).json({ emailError: 'Email already exists' });
     }
 
     // Create a new committee member
-    const newMember = new committeeMembers({
+    const newMember = new committeemembers({
       name,
       department,
       contactNumber,
@@ -740,10 +740,39 @@ export const getStudent = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+
+export const getMember = async (req,res) => {
+  try {
+    const { committees } = req.body;
+    const errors = { noStudentError: String };
+    const committeemember = await committeemembers.find({ committees });
+
+    if (committeemember.length === 0) {
+      errors.noStudentError = "No Student Found";
+      return res.status(404).json(errors);
+    }
+
+    res.status(200).json({ result: committeemember });
+  } catch (error) {
+    const errors = { backendError: String };
+    errors.backendError = error;
+    res.status(500).json(errors);
+  }
+}
+
 export const getAllStudent = async (req, res) => {
   try {
     const students = await Student.find();
     res.status(200).json(students);
+  } catch (error) {
+    console.log("Backend Error", error);
+  }
+};
+
+export const getAllCommitteeMember = async (req, res) => {
+  try {
+    const committeeMembers = await committeemembers.find();
+    res.status(200).json(committeeMembers);
   } catch (error) {
     console.log("Backend Error", error);
   }

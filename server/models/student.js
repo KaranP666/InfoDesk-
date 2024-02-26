@@ -66,7 +66,20 @@ const studentSchema = new Schema({
   },
   achivements : {
     type: String,
-  }
+  },
+  skillSets: {
+    type: Map,
+    of: Number,
+    default: {
+      ML: 0,
+      Blockchain: 0,
+      AI: 0,
+      Data_Science: 0,
+      Cyber_Security: 0,
+      App_Dev: 0,
+      Web_Dev: 0,
+    },
+  },
 });
 
 export default mongoose.model("student", studentSchema);

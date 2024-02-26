@@ -41,3 +41,14 @@ const adminSchema = mongoose.Schema(
 );
 
 export default mongoose.model("admin", adminSchema);
+
+// name: "Karan Panchal",
+// email: "karanh20ite@student.mes.ac.in",
+//  password: "abcc",
+//  username: "2021PE0832",
+//    department: "IT",
+//    dob: "09-10-2001",
+//    joiningYear: "2021",
+//    avatar: "NULL",
+//    contactNumber: "202020202020",
+//    passwordUpdated: false
