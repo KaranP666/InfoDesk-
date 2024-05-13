@@ -45,6 +45,9 @@ const facultySchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  achievements : {
+    type: Buffer,
+  },
 });
 
 export default mongoose.model("faculty", facultySchema);

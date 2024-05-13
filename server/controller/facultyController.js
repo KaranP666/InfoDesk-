@@ -6,6 +6,9 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import fs from 'fs';
+// import Student from "../models/student.js";
+
 
 export const facultyLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -268,5 +271,110 @@ export const markAttendance = async (req, res) => {
     const errors = { backendError: String };
     errors.backendError = error;
     res.status(500).json(errors);
+  }
+};
+
+
+
+export const getStudentByUsername = async (req, res) => {
+  try {
+    const { username } = req.params; 
+
+    const student = await Student.findOne({ username });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({ result: student });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
+export const getStudentByUsernameOrEmail = async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    const student = await Student.findOne({
+      $or: [{ username: identifier }, { email: identifier }]
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({ result: student });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+export const uploadPDF = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file selected' });
+    }
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'Username not provided' });
+    }
+
+    const faculty = await Faculty.findOne({ username });
+
+    if (!faculty) {
+      return res.status(404).json({ error: 'Faculty not found' });
+    }
+
+    const pdfBuffer = fs.readFileSync(req.file.path);
+
+    
+    faculty.achievements = pdfBuffer;
+    await faculty.save();
+
+    
+    return res.status(200).json({ message: 'File uploaded successfully' });
+  } catch (error) {
+
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+  }
+};
+
+
+export const getPDF = async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    // console.log("id", identifier);
+    const faculty = await Faculty.findOne({
+      $or: [{ username: identifier }, { email: identifier }]
+    });
+
+    
+
+    if (!faculty) {
+      return res.status(404).json({ message: "faculty not found" });
+    }
+  
+    const achievements = faculty.achievements;
+
+    const pdfData = Buffer.from(achievements, 'achievements');
+    console.log("pdf",pdfData);
+
+    res.set('Content-Type', 'application/pdf');
+    res.send(pdfData);
+
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -36,6 +36,9 @@ const adminSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    committeeAttendance : {
+      type: Buffer,
+    },
   },
   { strict: false }
 );

@@ -32,8 +32,11 @@ import {
   getAllCommittee,
   getAllCommitteeMember ,
   getMember,
+  uploadPDF,
+  getPDF,
   // getCommitteeMember
 } from "../controller/adminController.js";
+import multer from "multer";
 const router = express.Router();
 
 router.post("/login", adminLogin);
@@ -69,5 +72,10 @@ router.post("/deletefaculty", auth, deleteFaculty);
 router.post("/deletestudent", auth, deleteStudent);
 router.post("/deletedepartment", auth, deleteDepartment);
 router.post("/deletesubject", auth, deleteSubject);
+
+const upload = multer({ dest: "files/" });
+
+router.patch("/uploadpdf", auth, upload.single("pdfFile"), uploadPDF);
+router.get('/pdf/:identifier', getPDF);
 
 export default router;

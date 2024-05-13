@@ -8,6 +8,8 @@ import Notice from "../models/notice.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import committeemembers from "../models/committeeMembers.js";
+import admin from "../models/admin.js";
+import fs from 'fs';
 
 export const adminLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -743,9 +745,9 @@ export const getStudent = async (req, res) => {
 
 export const getMember = async (req,res) => {
   try {
-    const { committees } = req.body;
+    const { committee } = req.body;
     const errors = { noStudentError: String };
-    const committeemember = await committeemembers.find({ committees });
+    const committeemember = await committeemembers.find({ committee });
 
     if (committeemember.length === 0) {
       errors.noStudentError = "No Student Found";
@@ -817,5 +819,69 @@ export const getAllSubject = async (req, res) => {
     res.status(200).json(subjects);
   } catch (error) {
     console.log("Backend Error", error);
+  }
+};
+
+
+export const uploadPDF = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file selected' });
+    }
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'Username not provided' });
+    }
+
+    const admin = await Admin.findOne({ username });
+
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    const pdfBuffer = fs.readFileSync(req.file.path);
+
+    
+    admin.committeeAttendance = pdfBuffer;
+    await admin.save();
+
+    
+    return res.status(200).json({ message: 'File uploaded successfully' });
+  } catch (error) {
+
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+  }
+};
+
+
+export const getPDF = async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    const admin = await Admin.findOne({
+      $or: [{ username: identifier }, { email: identifier }]
+    });
+
+    
+
+    if (!admin) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+  
+    const committeeAttendance = admin.committeeAttendance;
+    const pdfData = Buffer.from(committeeAttendance, 'committeeAttendance');
+    console.log("pdf",pdfData);
+
+    res.set('Content-Type', 'application/pdf');
+    res.send(pdfData);
+
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

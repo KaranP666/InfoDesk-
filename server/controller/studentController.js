@@ -9,37 +9,91 @@ import bcrypt from "bcryptjs";
 import multer from 'multer';
 import express from 'express';
 
-import Achievement from '../models/student.js'; // Import the achievement model
+import achievements from '../models/student.js'; // Import the achievement model
 
 const router = express.Router();
 const upload = multer();
+import fs from 'fs';
+import { log } from "console";
+import { loadavg } from "os";
 
-// Route for uploading PDF files to the achievement model
-router.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+export const uploadPDF = async (req, res) => {
   try {
-    // Handle saving the PDF file to the achievement model in MongoDB here
-    const pdfFile = req.file;
-
-    if (pdfFile) {
-      // Save the file to the achievement model
-      const achievement = new Achievement({
-        pdfFile: pdfFile.buffer, // Assuming your achievement model has a field called pdfFile to store the buffer
-      });
-
-      await achievement.save();
-
-      // File uploaded successfully
-      res.status(200).json({ message: 'File uploaded successfully' });
-    } else {
-      // No file selected
-      res.status(400).json({ error: 'No file selected' });
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file selected' });
     }
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'Username not provided' });
+    }
+
+    const student = await Student.findOne({ username });
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const pdfBuffer = fs.readFileSync(req.file.path);
+
+    
+    student.achievements = pdfBuffer;
+    await student.save();
+
+    
+    return res.status(200).json({ message: 'File uploaded successfully' });
   } catch (error) {
-    // Handle errors
+
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
   }
-});
+};
+
+
+export const getPDF = async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    // console.log("id", identifier);
+    const student = await Student.findOne({
+      $or: [{ username: identifier }, { email: identifier }]
+    });
+
+    
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+  
+    const achievements = student.achievements;
+    // const binary = achievements ? achievements.$binary : null;
+
+    // const binary = await achievements.$binary
+    // console.log(binary)
+    // const base64 = binary ? binary.base64 : null;
+
+    // if (!binary) {
+    //   return res.status(404).json({ message: 'PDF not found for this student' });
+    // }
+
+    const pdfData = Buffer.from(achievements, 'achievements');
+    console.log("pdf",pdfData);
+
+    res.set('Content-Type', 'application/pdf');
+    res.send(pdfData);
+
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+
+};
+
+
 
 export default router;
 
@@ -122,7 +176,8 @@ export const updateStudent = async (req, res) => {
       fatherName,
       motherName,
       fatherContactNumber,
-      skillSets // Add skillSets to the destructuring assignment
+      skillSets, // Add skillSets to the destructuring assignment
+      CGPA,
     } = req.body;
     const updatedStudent = await Student.findOne({ email });
     if (name) {
@@ -169,15 +224,39 @@ export const updateStudent = async (req, res) => {
       updatedStudent.avatar = avatar;
       await updatedStudent.save();
     }
-
     if (skillSets) {
       updatedStudent.skillSets = skillSets;
+      await updatedStudent.save();
+    }
+    if (CGPA) {
+      updatedStudent.CGPA = CGPA;
+      await updatedStudent.save();
     }
     res.status(200).json(updatedStudent);
   } catch (error) {
     res.status(500).json(error);
   }
 };
+
+export const getDetailsStudent = async (req, res) => {
+  try {
+    const {id} = req.body
+    const errors = { notestError: String };
+
+    const student = await Student.findOne({ _id: id });
+    if(student?._doc) {
+      res.status(200).json({
+        ...student._doc
+      });
+    } else {
+      errors.notestError = "No Student Found";
+      return res.status(404).json(errors);
+    }
+    
+  } catch (error) {
+    res.status(500).json(error);
+  }
+}
 
 export const testResult = async (req, res) => {
   try {

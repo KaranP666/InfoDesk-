@@ -64,8 +64,8 @@ const studentSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  achivements : {
-    type: String,
+  achievements : {
+    type: Buffer,
   },
   skillSets: {
     type: Map,
@@ -78,6 +78,20 @@ const studentSchema = new Schema({
       Cyber_Security: 0,
       App_Dev: 0,
       Web_Dev: 0,
+    },
+  },
+  CGPA: {
+    type: Map,
+    of: Number,
+    default: {
+      SEM_ONE: 0,
+      SEM_TWO: 0,
+      SEM_THREE: 0,
+      SEM_FOUR: 0,
+      SEM_FIVE: 0,
+      SEM_SIX: 0,
+      SEM_SEVEN: 0,
+      SEM_EIGHT: 0
     },
   },
 });
